@@ -132,13 +132,13 @@ Previously, I developed a procedure to check identical tables in different datab
 
 ```sql
 -- Check if the table exists in both databases
-IF NOT EXISTS (SELECT * FROM [xxxdb].sys.objects WHERE object_id = OBJECT_ID(N'[xxxdb].[dbo].[tbyyy]') AND type in (N'U'))
+IF NOT EXISTS (SELECT * FROM [xxxdb].sys.objects WHERE object_id = OBJECT_ID(N'[xxxdb].[dbo].[tbyyy]') AND type in (N'U'))       -- FROM [xxxdb] or FROM [192.168.xxx.xxx].[xxxdb]
 BEGIN
     RAISERROR ('Table tbyyy does not exist in database xxxdb', 16, 1)
     RETURN
 END
 
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tbyyy]') AND type in (N'U'))
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tbyyy]') AND type in (N'U'))                       -- FROM [xxxdb] or FROM [192.168.xxx.xxx].[xxxdb]
 BEGIN
     RAISERROR ('Table tbyyy does not exist in the source database', 16, 1)
     RETURN
@@ -151,13 +151,13 @@ BEGIN TRY
     DECLARE @InsertedRecords INT;
 
     -- Insert missing records
-    -- INSERT INTO [xxxdb].[dbo].[tbyyy] (ID, Name, Description, DocumentTypeID)
+    -- INSERT INTO [xxxdb].[dbo].[tbyyy] (ID, Name, Description, DocumentTypeID)                                                 -- [xxxdb] or  [192.168.xxx.xxx].[xxxdb]
     SELECT
         src.ID,
         src.Name,
         src.Description,
         src.DocumentTypeID
-    FROM [dbo].[tbyyy] AS src
+    FROM [dbo].[tbyyy] AS src                                                                                                    -- FROM [xxxdb] or FROM [192.168.xxx.xxx].[xxxdb]
     LEFT JOIN [xxxdb].[dbo].[tbyyy] AS dest
         ON src.Name = dest.Name COLLATE Latin1_General_CI_AS
         AND src.DocumentTypeID = dest.DocumentTypeID
