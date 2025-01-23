@@ -4,11 +4,18 @@ from flask import Flask, render_template, request, send_from_directory, flash, r
 from werkzeug.utils import secure_filename
 
 class SQLScriptGenerator:
-    def __init__(self, upload_folder='uploads', download_folder='download'):
-        self.upload_folder = upload_folder
-        self.download_folder = download_folder
-        os.makedirs(upload_folder, exist_ok=True)
-        os.makedirs(download_folder, exist_ok=True)
+    def __init__(self):
+        # Detecta se está rodando na Vercel ou localmente
+        if os.getenv('VERCEL'):
+            self.upload_folder = '/tmp/uploads'
+            self.download_folder = '/tmp/download'
+        else:
+            self.upload_folder = 'uploads'
+            self.download_folder = 'download'
+
+        # Cria os diretórios, se necessário
+        os.makedirs(self.upload_folder, exist_ok=True)
+        os.makedirs(self.download_folder, exist_ok=True)
 
     def validate_dataframe(self, df, required_columns):
         """Valida colunas e tipos de dados"""
