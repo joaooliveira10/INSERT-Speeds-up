@@ -113,17 +113,12 @@ Access in your browser: `http://localhost:5000`
 4. Push to the branch
 5. Open a Pull Request
 
----
-
-## License
-
-[Specify the project license]
 
 ---
 
 ## Contact
 
-[Developer contact information]
+[joaoangello10@gmail.com]
 
 ---
 
