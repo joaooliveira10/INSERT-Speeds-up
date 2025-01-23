@@ -21,8 +21,8 @@ Este é um aplicativo Flask que permite gerar scripts de INSERT para SQL Server 
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/joaooliveira10/INSERT-Speeds-up/
-cd sql-script-generator
+git clone https://github.com/joaooliveira10/INSERT-Speeds-up.git
+cd INSERT-Speeds-up
 ```
 
 2. Crie um ambiente virtual:
