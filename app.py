@@ -5,7 +5,6 @@ from werkzeug.utils import secure_filename
 
 class SQLScriptGenerator:
     def __init__(self):
-        # Detecta se está rodando na Vercel ou localmente
         if os.getenv('VERCEL'):
             self.upload_folder = '/tmp/uploads'
             self.download_folder = '/tmp/download'
@@ -13,7 +12,6 @@ class SQLScriptGenerator:
             self.upload_folder = 'uploads'
             self.download_folder = 'download'
 
-        # Cria os diretórios, se necessário
         os.makedirs(self.upload_folder, exist_ok=True)
         os.makedirs(self.download_folder, exist_ok=True)
 
@@ -25,11 +23,12 @@ class SQLScriptGenerator:
         return df[required_columns]
 
     def generate_insert_scripts(self, df, table_name, columns, batch_size=1000):
-        """Gera scripts SQL com tratamento de tipos"""
+        """Gera scripts SQL com validação adicional e transações"""
         scripts = []
+        scripts.append("BEGIN TRANSACTION;")
+        
         for i in range(0, len(df), batch_size):
             batch = df[i:i+batch_size]
-            
             for _, row in batch.iterrows():
                 values = []
                 for col in columns:
@@ -43,10 +42,16 @@ class SQLScriptGenerator:
                         values.append(str(val))
                     else:
                         values.append(f"'{str(val)}'")
-                
-                script = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(values)});"
+
+                condition = " AND ".join([f"{col} = {val}" for col, val in zip(columns, values)])
+                script = (
+                    f"IF NOT EXISTS (SELECT 1 FROM {table_name} WHERE {condition}) "
+                    f"BEGIN INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(values)}); "
+                    f"IF @@ERROR <> 0 BEGIN ROLLBACK TRANSACTION; THROW; END END"
+                )
                 scripts.append(script)
-        
+
+        scripts.append("COMMIT TRANSACTION;")
         return scripts
 
     def save_scripts(self, scripts, filename='inserts.sql'):
@@ -114,4 +119,4 @@ if __name__ == '__main__':
     app = create_app()
     app.run(debug=True)
 else:
-    app = create_app()  # Vercel irá usar esta variável
+    app = create_app()
